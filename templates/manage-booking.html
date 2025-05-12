@@ -279,33 +279,54 @@
                             // Show booking details
                             const booking = data.data;
                             
-                            // Format the booking info HTML
+                            // Format the booking info HTML - handle both field name formats
+                            const bookingId = booking.booking_id || booking.id || '';
+                            const outletName = booking.outlet_name || booking.outlet || '';
+                            const bookingDate = booking.booking_date || booking.date || '';
+                            const bookingTime = booking.booking_time || booking.time || '';
+                            const guests = booking.guests || '';
+                            const customerName = booking.customer_name || booking.name || '';
+                            const phone = booking.phone || '';
+                            const status = booking.status || 'confirmed';
+                            
                             document.getElementById('bookingInfo').innerHTML = `
-                                <p><strong>Booking ID:</strong> ${booking.booking_id}</p>
-                                <p><strong>Outlet:</strong> ${booking.outlet_name}</p>
-                                <p><strong>Date:</strong> ${booking.booking_date}</p>
-                                <p><strong>Time:</strong> ${booking.booking_time}</p>
-                                <p><strong>Guests:</strong> ${booking.guests}</p>
-                                <p><strong>Name:</strong> ${booking.customer_name}</p>
-                                <p><strong>Phone:</strong> ${booking.phone}</p>
-                                <p><strong>Status:</strong> <span class="badge bg-${booking.status === 'confirmed' ? 'success' : 'secondary'}">${booking.status}</span></p>
+                                <p><strong>Booking ID:</strong> ${bookingId}</p>
+                                <p><strong>Outlet:</strong> ${outletName}</p>
+                                <p><strong>Date:</strong> ${bookingDate}</p>
+                                <p><strong>Time:</strong> ${bookingTime}</p>
+                                <p><strong>Guests:</strong> ${guests}</p>
+                                <p><strong>Name:</strong> ${customerName}</p>
+                                <p><strong>Phone:</strong> ${phone}</p>
+                                <p><strong>Status:</strong> <span class="badge bg-${status === 'confirmed' ? 'success' : 'secondary'}">${status}</span></p>
                             `;
                             
                             // Store booking ID for update/cancel operations
-                            document.getElementById('updateBookingId').value = booking.booking_id;
+                            document.getElementById('updateBookingId').value = bookingId;
                             
                             // Pre-fill update form
                             if (booking.outlet_id) {
                                 document.getElementById('updateOutletSelect').value = booking.outlet_id;
                             }
                             
-                            document.getElementById('updateDate').value = booking.booking_date;
+                            // Make sure booking date is defined before setting it
+                            if (booking.booking_date) {
+                                document.getElementById('updateDate').value = booking.booking_date;
+                            }
                             
-                            // Convert HH:MM:SS to HH:MM
-                            const timeStr = booking.booking_time.substring(0, 5);
-                            document.getElementById('updateTime').value = timeStr;
+                            // Safely convert HH:MM:SS to HH:MM only if booking_time is defined
+                            if (booking.booking_time && typeof booking.booking_time === 'string') {
+                                const timeStr = booking.booking_time.substring(0, 5);
+                                document.getElementById('updateTime').value = timeStr;
+                            } else if (booking.time && typeof booking.time === 'string') {
+                                // Try alternative property name
+                                const timeStr = booking.time.substring(0, 5);
+                                document.getElementById('updateTime').value = timeStr;
+                            }
                             
-                            document.getElementById('updateGuestCount').value = booking.guests;
+                            // Safely set guest count
+                            if (booking.guests) {
+                                document.getElementById('updateGuestCount').value = booking.guests;
+                            }
                             
                             // Show booking details
                             document.getElementById('bookingDetails').style.display = 'block';
@@ -374,7 +395,7 @@
                                 modal.hide();
                                 
                                 // Fill the search form with the booking ID
-                                document.getElementById('bookingIdRadio').checked = true;
+                                document.getElementById('searchById').checked = true;
                                 document.getElementById('bookingIdField').style.display = 'block';
                                 document.getElementById('phoneField').style.display = 'none';
                                 document.getElementById('bookingId').value = booking.booking_id;
