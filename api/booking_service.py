@@ -11,8 +11,10 @@ logger = logging.getLogger(__name__)
 # Create blueprint
 booking_bp = Blueprint('booking', __name__, url_prefix='/api/booking')
 
-# Data from knowledge base
-from data.bbq_knowledge_base import bbq_outlets_info
+# Import data at function level to avoid circular imports
+def get_bbq_outlets_info():
+    from data.bbq_knowledge_base import bbq_outlets_info
+    return bbq_outlets_info
 
 
 @booking_bp.route('/create', methods=['POST'])
@@ -60,7 +62,8 @@ def create_booking():
         
         # Get outlet name from ID
         outlet_name = "Barbeque Nation"
-        for outlet in bbq_outlets_info:
+        outlets = get_bbq_outlets_info()
+        for outlet in outlets:
             if outlet.get('id') == data['outlet_id']:
                 outlet_name = outlet.get('name')
                 break
@@ -253,7 +256,8 @@ def find_booking():
         
         # Get outlet name
         outlet_name = "Barbeque Nation"
-        for outlet in bbq_outlets_info:
+        outlets = get_bbq_outlets_info()
+        for outlet in outlets:
             if outlet.get('id') == booking.outlet_id:
                 outlet_name = outlet.get('name')
                 break
