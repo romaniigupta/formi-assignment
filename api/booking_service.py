@@ -242,6 +242,8 @@ def find_booking():
         }), 400
     
     try:
+        logger.info(f"Searching for booking: booking_id={booking_id}, phone={phone}")
+        
         # Find booking in database
         if booking_id:
             booking = Booking.query.filter_by(booking_id=booking_id).first()
@@ -249,18 +251,26 @@ def find_booking():
             booking = Booking.query.filter_by(phone=phone).order_by(Booking.created_at.desc()).first()
         
         if not booking:
+            logger.info("No booking found with the provided information")
             return jsonify({
                 'status': 'error',
                 'message': 'Booking not found with the provided information'
             }), 404
         
+        logger.info(f"Found booking with ID: {booking.booking_id}, outlet_id: {booking.outlet_id}")
+        
         # Get outlet name
         outlet_name = "Barbeque Nation"
-        outlets = get_bbq_outlets_info()
-        for outlet in outlets:
-            if outlet.get('id') == booking.outlet_id:
-                outlet_name = outlet.get('name')
-                break
+        try:
+            outlets = get_bbq_outlets_info()
+            for outlet in outlets:
+                if outlet.get('id') == booking.outlet_id:
+                    outlet_name = outlet.get('name')
+                    break
+            logger.info(f"Using outlet name: {outlet_name}")
+        except Exception as outlet_error:
+            logger.error(f"Error finding outlet name: {str(outlet_error)}")
+            # Continue even if outlet name lookup fails
         
         # Convert booking to dict and add outlet name
         booking_dict = booking.to_dict()
