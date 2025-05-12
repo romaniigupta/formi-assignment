@@ -355,50 +355,14 @@ def handle_function_call():
             logger.info(f"Creating booking with data: {booking_data}")
             
             try:
-                # Generate a booking ID and create booking directly
-                from datetime import datetime
-                import uuid
-                
-                # Generate a unique booking ID 
-                booking_id = f"BBQ-{str(uuid.uuid4())[:8].upper()}"
-                
-                # Format date and time 
-                try:
-                    booking_date = datetime.strptime(booking_data.get('date'), '%Y-%m-%d').date()
-                    booking_time = datetime.strptime(booking_data.get('time'), '%H:%M').time()
-                except:
-                    booking_date = datetime.now().date()
-                    booking_time = datetime.now().time()
-                
-                # Get outlet name from ID
-                outlet_name = "Barbeque Nation - Unknown"
-                # Import outlets info here to avoid circular imports
-                from data.bbq_knowledge_base import bbq_outlets_info
-                for outlet in bbq_outlets_info:
-                    if outlet.get('id') == booking_data.get('outlet_id'):
-                        outlet_name = outlet.get('name')
-                        break
-                        
-                # Simulate successful response
-                class MockResponse:
-                    status_code = 201
-                    
-                    def json(self):
-                        return {
-                            "status": "success",
-                            "data": {
-                                "booking_id": booking_id,
-                                "outlet": outlet_name,
-                                "date": booking_data.get('date'),
-                                "time": booking_data.get('time'),
-                                "guests": booking_data.get('guests', 2),
-                                "customer_name": booking_data.get('customer_name', 'Guest'),
-                                "phone": booking_data.get('phone', '9876543210'),
-                                "status": "confirmed"
-                            }
-                        }
-                
-                booking_response = MockResponse()
+                # Make actual API call to create the booking
+                booking_response = requests.post(
+                    f"{request.host_url.rstrip('/')}/api/booking/create",
+                    headers={
+                        'Content-Type': 'application/json'
+                    },
+                    json=booking_data
+                )
                 
                 logger.info(f"Booking response status: {booking_response.status_code}")
                 
@@ -451,27 +415,14 @@ def handle_function_call():
             logger.info(f"Updating booking with data: {booking_data}")
             
             try:
-                # Simulate successful booking update
-                class MockResponse:
-                    status_code = 200
-                    
-                    def json(self):
-                        return {
-                            "status": "success",
-                            "data": {
-                                "booking_id": booking_data.get('booking_id', 'BBQ-12345678'),
-                                "message": "Booking has been updated successfully",
-                                "updated_fields": ", ".join(booking_data.keys()),
-                                "new_booking_details": {
-                                    "date": booking_data.get('date', 'unchanged'),
-                                    "time": booking_data.get('time', 'unchanged'),
-                                    "guests": booking_data.get('guests', 'unchanged'),
-                                    "status": "confirmed"
-                                }
-                            }
-                        }
-                
-                booking_response = MockResponse()
+                # Make actual API call to update the booking
+                booking_response = requests.put(
+                    f"{request.host_url.rstrip('/')}/api/booking/update",
+                    headers={
+                        'Content-Type': 'application/json'
+                    },
+                    json=booking_data
+                )
                 
                 logger.info(f"Update booking response status: {booking_response.status_code}")
                 
@@ -524,21 +475,17 @@ def handle_function_call():
             logger.info(f"Cancelling booking with ID: {booking_id}")
             
             try:
-                # Simulate successful booking cancellation
-                class MockResponse:
-                    status_code = 200
-                    
-                    def json(self):
-                        return {
-                            "status": "success",
-                            "data": {
-                                "booking_id": booking_id,
-                                "message": "Booking has been cancelled successfully",
-                                "status": "cancelled"
-                            }
-                        }
-                
-                booking_response = MockResponse()
+                # Make actual API call to cancel the booking
+                from flask import current_app
+                booking_response = requests.post(
+                    f"{request.host_url.rstrip('/')}/api/booking/cancel",
+                    headers={
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'booking_id': booking_id
+                    }
+                )
                 
                 logger.info(f"Cancel booking response status: {booking_response.status_code}")
                 
