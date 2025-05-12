@@ -15,4 +15,5 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "pytz>=2025.2",
     "tiktoken>=0.9.0",
+    "openai>=1.78.1",
 ]

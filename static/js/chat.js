@@ -128,7 +128,9 @@ async function handleFunctionCall(userMessage) {
     let functionName = 'query_knowledge_base';
     let functionArgs = { query: userMessage, type: 'general' };
     
+    // Check if we're in a booking state
     if (conversationState === 'booking_enquiry' || conversationState === 'booking_confirmation') {
+      // Check if we have all required booking details for confirmation
       if (conversationState === 'booking_confirmation' && 
           conversationContext.outlet && 
           conversationContext.booking_date && 
@@ -136,6 +138,7 @@ async function handleFunctionCall(userMessage) {
           conversationContext.guests && 
           conversationContext.customer_name && 
           conversationContext.phone) {
+        // Complete booking
         functionName = 'create_booking';
         functionArgs = {
           outlet_id: conversationContext.outlet,
@@ -146,16 +149,22 @@ async function handleFunctionCall(userMessage) {
           phone: conversationContext.phone || currentPhone
         };
       } else {
+        // Still collecting booking info
         functionName = 'query_knowledge_base';
         functionArgs = { query: userMessage, type: 'booking' };
       }
-    } else if (conversationState === 'booking_modification' || 
-               conversationState === 'booking_update_confirmation' || 
-               conversationState === 'cancellation_confirmation') {
+    } 
+    // Check if we're in a modification state
+    else if (conversationState === 'booking_modification' || 
+             conversationState === 'booking_update_confirmation' || 
+             conversationState === 'cancellation_confirmation') {
+      // Handle cancellation
       if (conversationState === 'cancellation_confirmation' && conversationContext.booking_id) {
         functionName = 'cancel_booking';
         functionArgs = { booking_id: conversationContext.booking_id };
-      } else if (conversationState === 'booking_update_confirmation' && conversationContext.booking_id) {
+      } 
+      // Handle update
+      else if (conversationState === 'booking_update_confirmation' && conversationContext.booking_id) {
         functionName = 'update_booking';
         functionArgs = { 
           booking_id: conversationContext.booking_id,
@@ -165,13 +174,18 @@ async function handleFunctionCall(userMessage) {
           guests: conversationContext.new_guests
         };
       } else {
+        // Still collecting modification info
         functionName = 'query_knowledge_base';
         functionArgs = { query: userMessage, type: 'booking_modification' };
       }
-    } else if (conversationState === 'faq_enquiry') {
+    } 
+    // FAQ state
+    else if (conversationState === 'faq_enquiry') {
       functionName = 'query_knowledge_base';
       functionArgs = { query: userMessage, type: 'faq' };
     }
+    
+    console.log("Making function call:", functionName, functionArgs);
     
     // Call function via API
     const response = await fetch(`${API_BASE}/api/conversation/retell/function-call`, {
@@ -186,41 +200,49 @@ async function handleFunctionCall(userMessage) {
     });
     
     const result = await response.json();
+    console.log("API response:", result);
     
     if (result.status === 'success') {
       // Process the response based on the data type
       const data = result.data;
       
+      if (!data) {
+        return defaultResponse;
+      }
+      
       if (data.type === 'outlets') {
-        return generateOutletsResponse(data.data);
+        return generateOutletsResponse(data.data || []);
       } else if (data.type === 'menu') {
-        return generateMenuResponse(data.data);
+        return generateMenuResponse(data.data || []);
       } else if (data.type === 'faq') {
-        return generateFaqResponse(data.data);
+        return generateFaqResponse(data.data || []);
       } else if (data.type === 'booking') {
         return data.message || "To make a reservation, I'll need your name, contact number, preferred date, time, and number of guests.";
       } else if (data.type === 'booking_created') {
         // Update context with booking ID
-        conversationContext.booking_id = data.booking.booking_id;
-        return `Great! I've successfully booked your table. Here are the details:\n\nBooking ID: ${data.booking.booking_id}\nOutlet: ${data.booking.outlet}\nDate: ${data.booking.date}\nTime: ${data.booking.time}\nGuests: ${data.booking.guests}\n\nIs there anything else you'd like help with?`;
+        conversationContext.booking_id = data.booking?.booking_id;
+        return `Great! I've successfully booked your table. Here are the details:\n\nBooking ID: ${data.booking?.booking_id || 'N/A'}\nOutlet: ${data.booking?.outlet || 'N/A'}\nDate: ${data.booking?.date || 'N/A'}\nTime: ${data.booking?.time || 'N/A'}\nGuests: ${data.booking?.guests || 'N/A'}\n\nIs there anything else you'd like help with?`;
       } else if (data.type === 'booking_updated') {
-        return `Your booking has been successfully updated. Here are the new details:\n\nBooking ID: ${data.booking.booking_id}\nOutlet: ${data.booking.outlet}\nDate: ${data.booking.date}\nTime: ${data.booking.time}\nGuests: ${data.booking.guests}\n\nIs there anything else you'd like help with?`;
+        return `Your booking has been successfully updated. Here are the new details:\n\nBooking ID: ${data.booking?.booking_id || 'N/A'}\nOutlet: ${data.booking?.outlet || 'N/A'}\nDate: ${data.booking?.date || 'N/A'}\nTime: ${data.booking?.time || 'N/A'}\nGuests: ${data.booking?.guests || 'N/A'}\n\nIs there anything else you'd like help with?`;
       } else if (data.type === 'booking_cancelled') {
-        return `${data.message} Your booking has been successfully cancelled. Is there anything else I can help you with?`;
+        return `Your booking has been successfully cancelled. Is there anything else I can help you with?`;
       } else if (data.type === 'error') {
         return data.message || "I'm sorry, I couldn't complete that request. Please try again.";
       } else if (data.type === 'general') {
         return data.message || defaultResponse;
+      } else if (typeof data === 'string') {
+        // Handle case where data is a string directly
+        return data;
       } else {
         // Handle other response types or raw text
-        return data.message || JSON.stringify(data) || defaultResponse;
+        return data.message || (typeof data === 'object' ? JSON.stringify(data) : String(data)) || defaultResponse;
       }
     } else {
       return result.message || defaultResponse;
     }
   } catch (error) {
     console.error('Function call error:', error);
-    return defaultResponse;
+    return "I apologize, but I'm having trouble processing your request right now. Could you please try again?";
   }
 }
 
@@ -270,12 +292,25 @@ function generateFaqResponse(faqs) {
 
 // UI functions
 function addMessage(message, sender) {
+  // Verify chat container exists
+  if (!chatMessages) {
+    console.error("Chat messages container not found");
+    return;
+  }
+  
   const messageContainer = document.createElement('div');
   messageContainer.className = 'message-container';
   
   const messageElement = document.createElement('div');
   messageElement.className = `message message-${sender}`;
-  messageElement.textContent = message;
+  
+  // Format message text (handle markdown-like syntax)
+  message = message.replace(/\n/g, '<br>');
+  message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  message = message.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  
+  // Set innerHTML instead of textContent to preserve formatting
+  messageElement.innerHTML = message;
   
   const timeElement = document.createElement('div');
   timeElement.className = 'message-time';

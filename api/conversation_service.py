@@ -220,6 +220,8 @@ def handle_function_call():
         function_name = data.get('name', '')
         arguments = data.get('arguments', {})
         
+        logger.info(f"Function call received: {function_name} with arguments: {arguments}")
+        
         if not function_name:
             return jsonify({
                 "status": "error",
@@ -232,31 +234,45 @@ def handle_function_call():
             query = arguments.get('query', '')
             query_type = arguments.get('type', 'general')
             
-            # Make request to knowledge base API
-            kb_response = requests.post(
-                f"{request.host_url}api/knowledge/query",
-                json={"query": query, "type": query_type}
-            )
+            logger.info(f"Querying knowledge base with: {query} (type: {query_type})")
             
-            if kb_response.status_code == 200:
-                kb_data = kb_response.json()
+            try:
+                # Make request to knowledge base API
+                kb_response = requests.post(
+                    f"{request.url_root}api/knowledge/query",
+                    json={"query": query, "type": query_type},
+                    timeout=10
+                )
                 
-                # Ensure the response fits within token limits
-                result = kb_data.get('result', {})
-                optimized_result = token_manager.optimize_response(result)
+                logger.info(f"Knowledge base response status: {kb_response.status_code}")
                 
+                if kb_response.status_code == 200:
+                    kb_data = kb_response.json()
+                    
+                    # Ensure the response fits within token limits
+                    result = kb_data.get('result', {})
+                    optimized_result = token_manager.optimize_response(result)
+                    
+                    return jsonify({
+                        "status": "success",
+                        "data": optimized_result
+                    })
+                else:
+                    logger.error(f"Error from knowledge base: {kb_response.text}")
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "error",
+                            "message": "I'm unable to retrieve that information at the moment. Could you please try a different question or rephrase your query?"
+                        }
+                    })
+            except requests.RequestException as req_error:
+                logger.error(f"Request error querying knowledge base: {str(req_error)}")
                 return jsonify({
                     "status": "success",
-                    "data": optimized_result
-                })
-            else:
-                logger.error(f"Error from knowledge base: {kb_response.text}")
-                return jsonify({
-                    "status": "error",
-                    "message": "Knowledge base query failed",
                     "data": {
-                        "type": "error",
-                        "message": "I'm unable to retrieve that information at the moment. Could you please try a different question or rephrase your query?"
+                        "type": "general",
+                        "message": "I can help you with information about Barbeque Nation, including our outlets in Delhi and Bangalore, menu items, and reservation services. What would you like to know?"
                     }
                 })
                 
@@ -271,34 +287,48 @@ def handle_function_call():
                 "phone": arguments.get('phone')
             }
             
-            # Make request to booking API
-            booking_response = requests.post(
-                f"{request.host_url}api/knowledge/bookings",
-                json=booking_data
-            )
+            logger.info(f"Creating booking with data: {booking_data}")
             
-            if booking_response.status_code == 201:
-                booking_result = booking_response.json()
+            try:
+                # Make request to booking API
+                booking_response = requests.post(
+                    f"{request.url_root}api/knowledge/bookings",
+                    json=booking_data,
+                    timeout=10
+                )
                 
-                # Ensure the response fits within token limits
-                booking_data = booking_result.get('data', {})
-                optimized_data = token_manager.optimize_response(booking_data)
+                logger.info(f"Booking response status: {booking_response.status_code}")
                 
+                if booking_response.status_code == 201:
+                    booking_result = booking_response.json()
+                    
+                    # Ensure the response fits within token limits
+                    booking_data = booking_result.get('data', {})
+                    optimized_data = token_manager.optimize_response(booking_data)
+                    
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "booking_created",
+                            "booking": optimized_data
+                        }
+                    })
+                else:
+                    logger.error(f"Error creating booking: {booking_response.text}")
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "error",
+                            "message": "I'm unable to complete your booking at the moment. Please check the information provided and try again."
+                        }
+                    })
+            except requests.RequestException as req_error:
+                logger.error(f"Request error creating booking: {str(req_error)}")
                 return jsonify({
                     "status": "success",
                     "data": {
-                        "type": "booking_created",
-                        "booking": optimized_data
-                    }
-                })
-            else:
-                logger.error(f"Error creating booking: {booking_response.text}")
-                return jsonify({
-                    "status": "error",
-                    "message": "Booking creation failed",
-                    "data": {
                         "type": "error",
-                        "message": "I'm unable to complete your booking at the moment. Please check the information provided and try again."
+                        "message": "I encountered a problem with our booking system. Please try again later or contact us directly by phone."
                     }
                 })
                 
@@ -315,34 +345,48 @@ def handle_function_call():
             # Remove None values
             booking_data = {k: v for k, v in booking_data.items() if v is not None}
             
-            # Make request to booking API
-            booking_response = requests.put(
-                f"{request.host_url}api/knowledge/bookings",
-                json=booking_data
-            )
+            logger.info(f"Updating booking with data: {booking_data}")
             
-            if booking_response.status_code == 200:
-                booking_result = booking_response.json()
+            try:
+                # Make request to booking API
+                booking_response = requests.put(
+                    f"{request.url_root}api/knowledge/bookings",
+                    json=booking_data,
+                    timeout=10
+                )
                 
-                # Ensure the response fits within token limits
-                booking_data = booking_result.get('data', {})
-                optimized_data = token_manager.optimize_response(booking_data)
+                logger.info(f"Update booking response status: {booking_response.status_code}")
                 
+                if booking_response.status_code == 200:
+                    booking_result = booking_response.json()
+                    
+                    # Ensure the response fits within token limits
+                    booking_data = booking_result.get('data', {})
+                    optimized_data = token_manager.optimize_response(booking_data)
+                    
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "booking_updated",
+                            "booking": optimized_data
+                        }
+                    })
+                else:
+                    logger.error(f"Error updating booking: {booking_response.text}")
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "error",
+                            "message": "I'm unable to update your booking at the moment. Please check the booking ID and try again."
+                        }
+                    })
+            except requests.RequestException as req_error:
+                logger.error(f"Request error updating booking: {str(req_error)}")
                 return jsonify({
                     "status": "success",
                     "data": {
-                        "type": "booking_updated",
-                        "booking": optimized_data
-                    }
-                })
-            else:
-                logger.error(f"Error updating booking: {booking_response.text}")
-                return jsonify({
-                    "status": "error",
-                    "message": "Booking update failed",
-                    "data": {
                         "type": "error",
-                        "message": "I'm unable to update your booking at the moment. Please check the booking ID and try again."
+                        "message": "I encountered a problem with our booking system. Please try again later or contact us directly by phone."
                     }
                 })
                 
@@ -352,57 +396,63 @@ def handle_function_call():
             
             if not booking_id:
                 return jsonify({
-                    "status": "error",
-                    "message": "Booking ID is required to cancel a booking",
+                    "status": "success",
                     "data": {
                         "type": "error",
                         "message": "I need your booking ID to cancel your reservation. Could you please provide it?"
                     }
-                }), 400
-                
-            # Make request to booking API
-            booking_response = requests.delete(
-                f"{request.host_url}api/knowledge/bookings?booking_id={booking_id}"
-            )
+                })
             
-            if booking_response.status_code == 200:
-                booking_result = booking_response.json()
+            logger.info(f"Cancelling booking with ID: {booking_id}")
+            
+            try:
+                # Make request to booking API
+                booking_response = requests.delete(
+                    f"{request.url_root}api/knowledge/bookings?booking_id={booking_id}",
+                    timeout=10
+                )
                 
+                logger.info(f"Cancel booking response status: {booking_response.status_code}")
+                
+                if booking_response.status_code == 200:
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "booking_cancelled",
+                            "message": "Your booking has been successfully cancelled."
+                        }
+                    })
+                else:
+                    logger.error(f"Error cancelling booking: {booking_response.text}")
+                    return jsonify({
+                        "status": "success",
+                        "data": {
+                            "type": "error",
+                            "message": "I'm unable to cancel your booking at the moment. Please check the booking ID and try again."
+                        }
+                    })
+            except requests.RequestException as req_error:
+                logger.error(f"Request error cancelling booking: {str(req_error)}")
                 return jsonify({
                     "status": "success",
                     "data": {
-                        "type": "booking_cancelled",
-                        "message": "Your booking has been successfully cancelled."
-                    }
-                })
-            else:
-                logger.error(f"Error cancelling booking: {booking_response.text}")
-                return jsonify({
-                    "status": "error",
-                    "message": "Booking cancellation failed",
-                    "data": {
                         "type": "error",
-                        "message": "I'm unable to cancel your booking at the moment. Please check the booking ID and try again."
+                        "message": "I encountered a problem with our booking system. Please try again later or contact us directly by phone."
                     }
                 })
         else:
+            logger.warning(f"Unknown function called: {function_name}")
             return jsonify({
-                "status": "error",
-                "message": f"Unknown function: {function_name}",
+                "status": "success",
                 "data": {
-                    "type": "error",
-                    "message": "I don't know how to perform that function. Please try a different request."
+                    "type": "general",
+                    "message": "I'm not sure how to help with that specific request. I can provide information about our outlets, menu, answer FAQs, or help with bookings. How can I assist you today?"
                 }
-            }), 400
+            })
             
     except Exception as e:
         logger.error(f"Error handling function call: {str(e)}")
         return jsonify({
-            "status": "error",
-            "message": "Failed to handle function call",
-            "error": str(e),
-            "data": {
-                "type": "error",
-                "message": "I encountered an error processing your request. Please try again."
-            }
-        }), 500
+            "status": "success",
+            "data": "I apologize for the technical difficulties. I'm having trouble processing your request at the moment. Would you like to try a different question or maybe ask about our locations or menu?"
+        })
