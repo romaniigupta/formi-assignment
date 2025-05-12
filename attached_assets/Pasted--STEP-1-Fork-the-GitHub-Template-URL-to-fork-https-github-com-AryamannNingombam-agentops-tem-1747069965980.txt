@@ -1,0 +1,156 @@
+✅ STEP 1: Fork the GitHub Template
+URL to fork:
+👉 https://github.com/AryamannNingombam/agentops-template-repo
+
+Go to the repo, click “Fork” at the top-right.
+
+Clone it to your local system or open with GitHub Codespaces or VS Code (whichever is fastest for you).
+
+This is your base project where everything will go.
+
+✅ STEP 2: Structured Knowledge Base for Delhi and Bangalore
+You need to create a structured knowledge base for each city (Delhi & Bangalore).
+
+How to do it fast:
+
+Take the raw data provided in the resources (likely a Google Doc or text file).
+
+Structure it into JSON format like this:
+
+json
+Copy
+Edit
+{
+  "delhi": {
+    "address": "...",
+    "timings": "...",
+    "faqs": {
+      "is veg food available?": "Yes, we offer a wide range of vegetarian dishes.",
+      ...
+    }
+  },
+  "bangalore": {
+    "address": "...",
+    "timings": "...",
+    "faqs": {
+      ...
+    }
+  }
+}
+Put this into a file called knowledge_base.json.
+
+Expose an API endpoint:
+
+python
+Copy
+Edit
+# FastAPI example for serving knowledge base
+from fastapi import FastAPI
+import json
+
+app = FastAPI()
+
+@app.get("/knowledge-base/{city}")
+def get_kb(city: str):
+    with open("knowledge_base.json") as f:
+        kb = json.load(f)
+    return kb.get(city.lower(), {})
+✅ STEP 3: Define State Prompts & Transitions
+Refer to the "State Template Diagram" (from the resources). You’ll define a few states like:
+
+Greeting
+
+Booking Collection
+
+Update Booking
+
+Cancel Booking
+
+Answer FAQ
+
+Each state prompt is just a text like:
+
+"You are a helpful agent for Barbeque Nation in {city}. The user wants to {intent}. Gather the necessary information and confirm."
+
+Example Transition Prompt:
+
+python
+Copy
+Edit
+def get_next_state(user_input):
+    if "book" in user_input.lower():
+        return "booking_collection"
+    elif "cancel" in user_input.lower():
+        return "cancel_booking"
+    elif "change" in user_input.lower() or "update" in user_input.lower():
+        return "update_booking"
+    elif "?" in user_input:
+        return "faq"
+    else:
+        return "fallback"
+✅ STEP 4: Connect State Machine Platform
+Platform to use:
+👉 https://beta.retellai.com/
+
+Use this to build a state machine with your defined states.
+
+Upload your state prompts and transition rules.
+
+Test a flow (e.g., Greeting → FAQ or Greeting → Booking)
+
+✅ STEP 5: Host API Endpoints
+Use Render or Replit (quickest) to host your FastAPI app.
+
+Deploy /knowledge-base/{city} endpoint
+
+Add this link to your README.
+
+✅ STEP 6: (BONUS) Post-Call Analysis
+Create a simple Excel Sheet with:
+
+Conversation ID
+
+Start Time
+
+End Time
+
+Intent (booking, faq, etc.)
+
+Resolved (Yes/No)
+
+Notes
+
+Use dummy data or logs.
+
+✅ STEP 7: (BONUS) Chatbot Creation
+Go to beta.retellai.com, open DevTools > Network tab.
+
+Record interaction and copy the API endpoint the browser hits when you send a message.
+
+Use this endpoint to create a frontend chatbot (simple HTML + JS).
+
+Host on Netlify or Vercel and add the chatbot link to your README.
+
+✅ STEP 8: Prepare README
+Your README.md must include:
+
+Knowledge Base API Endpoint
+
+Chatbot Link (if done)
+
+Post-Call Analysis Sheet Link (Google Sheets or Excel)
+
+Agent Phone Number (if connected to a test number)
+
+✅ STEP 9: Submit
+Submit the form here 👉 https://forms.gle/7qSTquHbBaKzy9MJ8
+
+Would you like me to quickly generate:
+
+The state prompt examples?
+
+A basic FastAPI file with endpoints ready?
+
+A JSON template for the knowledge base?
+
+Let me know what to prioritize in your remaining time.

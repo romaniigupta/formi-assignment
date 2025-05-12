@@ -237,37 +237,66 @@ def handle_function_call():
             logger.info(f"Querying knowledge base with: {query} (type: {query_type})")
             
             try:
-                # Make request to knowledge base API
-                kb_response = requests.post(
-                    f"{request.url_root}api/knowledge/query",
-                    json={"query": query, "type": query_type},
-                    timeout=10
-                )
+                # Use direct lookup from our knowledge base rather than making an HTTP request
+                from data.bbq_knowledge_base import bbq_outlets_info, bbq_faq_info, bbq_menu_info
+                import random
                 
-                logger.info(f"Knowledge base response status: {kb_response.status_code}")
+                logger.info("Using direct knowledge base access")
                 
-                if kb_response.status_code == 200:
-                    kb_data = kb_response.json()
+                # Process based on query type
+                if query_type == 'outlets' or 'outlet' in query.lower() or 'location' in query.lower():
+                    # Filter for Delhi/Bangalore if mentioned
+                    if 'delhi' in query.lower():
+                        outlets = [o for o in bbq_outlets_info if o['city'].lower() == 'delhi']
+                    elif 'bangalore' in query.lower() or 'bengaluru' in query.lower():
+                        outlets = [o for o in bbq_outlets_info if o['city'].lower() == 'bangalore']
+                    else:
+                        outlets = bbq_outlets_info
+                        
+                    result = {
+                        "type": "outlets",
+                        "data": outlets[:3]  # Just send top 3 to keep response size manageable
+                    }
                     
-                    # Ensure the response fits within token limits
-                    result = kb_data.get('result', {})
-                    optimized_result = token_manager.optimize_response(result)
+                elif query_type == 'faq' or '?' in query:
+                    # Find relevant FAQs
+                    relevant_faqs = []
+                    for faq in bbq_faq_info:
+                        if any(word in faq['question'].lower() for word in query.lower().split()):
+                            relevant_faqs.append(faq)
                     
-                    return jsonify({
-                        "status": "success",
-                        "data": optimized_result
-                    })
+                    if not relevant_faqs:
+                        # If nothing matched, just pick a couple random FAQs
+                        relevant_faqs = random.sample(bbq_faq_info, min(2, len(bbq_faq_info)))
+                    
+                    result = {
+                        "type": "faq",
+                        "data": relevant_faqs
+                    }
+                    
+                elif query_type == 'menu' or any(word in query.lower() for word in ['food', 'menu', 'eat', 'dish']):
+                    # Return menu items
+                    result = {
+                        "type": "menu",
+                        "data": bbq_menu_info[:5]  # Just return first 5 items
+                    }
+                    
                 else:
-                    logger.error(f"Error from knowledge base: {kb_response.text}")
-                    return jsonify({
-                        "status": "success",
-                        "data": {
-                            "type": "error",
-                            "message": "I'm unable to retrieve that information at the moment. Could you please try a different question or rephrase your query?"
-                        }
-                    })
-            except requests.RequestException as req_error:
-                logger.error(f"Request error querying knowledge base: {str(req_error)}")
+                    # Generic response
+                    result = {
+                        "type": "general",
+                        "message": "I can help you with information about Barbeque Nation, including our outlets in Delhi and Bangalore, menu items, and reservation services. What would you like to know?"
+                    }
+                
+                # Ensure the response fits within token limits
+                optimized_result = token_manager.optimize_response(result)
+                
+                return jsonify({
+                    "status": "success",
+                    "data": optimized_result
+                })
+            except Exception as e:
+                logger.error(f"Error querying knowledge base: {str(e)}")
                 return jsonify({
                     "status": "success",
                     "data": {
