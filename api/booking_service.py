@@ -15,6 +15,42 @@ booking_bp = Blueprint('booking', __name__, url_prefix='/api/booking')
 def get_bbq_outlets_info():
     from data.bbq_knowledge_base import bbq_outlets_info
     return bbq_outlets_info
+    
+# Helper function to create a test booking
+def create_test_booking():
+    """Create a test booking for demo purposes"""
+    import uuid
+    from datetime import datetime, timedelta
+    
+    # Check if the booking already exists
+    test_booking = Booking.query.filter_by(phone="9876543210").first()
+    if test_booking:
+        return test_booking
+    
+    # Generate unique booking ID
+    booking_id = f"BBQ-TEST{str(uuid.uuid4())[:4].upper()}"
+    
+    # Use tomorrow's date for the booking
+    tomorrow = datetime.now() + timedelta(days=1)
+    booking_date = tomorrow.date()
+    booking_time = datetime.strptime("19:00", "%H:%M").time()
+    
+    # Create booking in database
+    new_booking = Booking(
+        booking_id=booking_id,
+        outlet_id="BBQD001",  # Delhi - Connaught Place
+        booking_date=booking_date,
+        booking_time=booking_time,
+        guests=2,
+        customer_name="Test User",
+        phone="9876543210",
+        status='confirmed'
+    )
+    
+    db.session.add(new_booking)
+    db.session.commit()
+    
+    return new_booking
 
 
 @booking_bp.route('/create', methods=['POST'])
@@ -226,6 +262,41 @@ def cancel_booking():
         return jsonify({
             'status': 'error',
             'message': f'Failed to cancel booking: {str(e)}'
+        }), 500
+
+
+@booking_bp.route('/test', methods=['GET'])
+def test_booking():
+    """Create a test booking for demo purposes"""
+    try:
+        test_booking = create_test_booking()
+        
+        # Get outlet name
+        outlet_name = "Barbeque Nation"
+        try:
+            outlets = get_bbq_outlets_info()
+            for outlet in outlets:
+                if outlet.get('id') == test_booking.outlet_id:
+                    outlet_name = outlet.get('name')
+                    break
+        except Exception as outlet_error:
+            logger.error(f"Error finding outlet name: {str(outlet_error)}")
+        
+        # Return the test booking details
+        booking_dict = test_booking.to_dict()
+        booking_dict['outlet_name'] = outlet_name
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Test booking created successfully',
+            'data': booking_dict
+        })
+    
+    except Exception as e:
+        logger.error(f"Error creating test booking: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to create test booking: {str(e)}'
         }), 500
 
 

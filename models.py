@@ -26,7 +26,8 @@ class Booking(db.Model):
         return {
             'id': self.id,
             'booking_id': self.booking_id,
-            'outlet': self.outlet_id,
+            'outlet_id': self.outlet_id,  # Include original outlet_id
+            'outlet': self.outlet_id,     # Keep this for backward compatibility
             'date': self.booking_date.strftime('%Y-%m-%d'),
             'time': self.booking_time.strftime('%H:%M'),
             'guests': self.guests,

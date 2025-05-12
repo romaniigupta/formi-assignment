@@ -151,12 +151,35 @@
 
             <div class="text-center mt-4">
                 <a href="/chat" class="btn btn-outline-secondary">Need Help? Chat with our Assistant</a>
+                <button id="createTestBooking" class="btn btn-outline-info ms-2">Create Test Booking</button>
             </div>
         </div>
         
         <div class="text-center mt-5">
             <a href="/" class="btn btn-link">Back to Home</a>
             <a href="/booking" class="btn btn-link">New Reservation</a>
+        </div>
+        
+        <!-- Test booking details dialog -->
+        <div class="modal fade" id="testBookingModal" tabindex="-1" aria-labelledby="testBookingModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="testBookingModalLabel">Test Booking Created</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <p>A test booking has been created for you to try the system.</p>
+                            <div id="testBookingDetails"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="useTestBooking">Use This Booking</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
