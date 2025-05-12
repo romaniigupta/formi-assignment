@@ -372,6 +372,8 @@ def handle_function_call():
                 
                 # Get outlet name from ID
                 outlet_name = "Barbeque Nation - Unknown"
+                # Import outlets info here to avoid circular imports
+                from data.bbq_knowledge_base import bbq_outlets_info
                 for outlet in bbq_outlets_info:
                     if outlet.get('id') == booking_data.get('outlet_id'):
                         outlet_name = outlet.get('name')
