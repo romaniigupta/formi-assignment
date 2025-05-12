@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbeque Nation - Manage Your Booking</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .logo {
+            max-width: 250px;
+            margin-bottom: 2rem;
+        }
+        .booking-form {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 2rem;
+            border-radius: 10px;
+            background-color: var(--bs-dark);
+        }
+        .booking-title {
+            margin-bottom: 2rem;
+            color: var(--bs-primary);
+        }
+        .alert {
+            display: none;
+        }
+        #bookingDetails {
+            display: none;
+        }
+        #updateForm {
+            display: none;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="mb-4">Barbeque Nation</h1>
+            <p class="lead mb-5">Manage your existing reservation</p>
+        </div>
+
+        <div class="booking-form">
+            <h2 class="booking-title">Find Your Booking</h2>
+            
+            <div class="alert alert-success" id="actionSuccess" role="alert">
+                <h4 class="alert-heading" id="successHeading">Success!</h4>
+                <p id="successMessage"></p>
+            </div>
+            
+            <div class="alert alert-danger" id="actionError" role="alert">
+                <h4 class="alert-heading">Error</h4>
+                <p id="errorMessage">Sorry, there was a problem processing your request.</p>
+            </div>
+            
+            <div id="searchForm">
+                <div class="mb-3">
+                    <label class="form-label">Search by</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchById" value="booking_id" checked>
+                        <label class="form-check-label" for="searchById">
+                            Booking ID
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="searchType" id="searchByPhone" value="phone">
+                        <label class="form-check-label" for="searchByPhone">
+                            Phone Number
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="bookingIdField">
+                    <label for="bookingId" class="form-label">Booking ID</label>
+                    <input type="text" class="form-control" id="bookingId" placeholder="e.g., BBQ-12345678">
+                </div>
+                
+                <div class="mb-3" id="phoneField" style="display: none;">
+                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phoneNumber" 
+                           pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                </div>
+                
+                <button type="button" id="searchButton" class="btn btn-primary btn-lg w-100">Find Booking</button>
+            </div>
+            
+            <div id="bookingDetails" class="mt-4">
+                <h3>Booking Details</h3>
+                <div class="card mb-4">
+                    <div class="card-body" id="bookingInfo">
+                        <!-- Booking info will be shown here -->
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" id="modifyButton" class="btn btn-warning flex-grow-1">Modify Booking</button>
+                    <button type="button" id="cancelButton" class="btn btn-danger flex-grow-1">Cancel Booking</button>
+                </div>
+            </div>
+            
+            <form id="updateForm" class="mt-4">
+                <h3>Update Booking</h3>
+                
+                <input type="hidden" id="updateBookingId">
+                
+                <div class="mb-3">
+                    <label for="updateOutletSelect" class="form-label">Select Outlet</label>
+                    <select class="form-select" id="updateOutletSelect">
+                        <option value="" selected disabled>Choose an outlet</option>
+                        <!-- Outlets will be loaded dynamically -->
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="updateDate" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="updateDate" min="" max="">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="updateTime" class="form-label">Time</label>
+                    <select class="form-select" id="updateTime">
+                        <option value="" selected disabled>Select a time</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="12:30">12:30 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="13:30">1:30 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="18:00">6:00 PM</option>
+                        <option value="18:30">6:30 PM</option>
+                        <option value="19:00">7:00 PM</option>
+                        <option value="19:30">7:30 PM</option>
+                        <option value="20:00">8:00 PM</option>
+                        <option value="20:30">8:30 PM</option>
+                        <option value="21:00">9:00 PM</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="updateGuestCount" class="form-label">Number of Guests</label>
+                    <input type="number" class="form-control" id="updateGuestCount" min="1" max="20">
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" id="cancelUpdateButton" class="btn btn-secondary flex-grow-1">Cancel</button>
+                    <button type="submit" id="confirmUpdateButton" class="btn btn-success flex-grow-1">Save Changes</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="/chat" class="btn btn-outline-secondary">Need Help? Chat with our Assistant</a>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="/" class="btn btn-link">Back to Home</a>
+            <a href="/booking" class="btn btn-link">New Reservation</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set min date to today and max date to 30 days from now for update form
+            const today = new Date();
+            const thirtyDaysLater = new Date(today);
+            thirtyDaysLater.setDate(today.getDate() + 30);
+            
+            const updateDateInput = document.getElementById('updateDate');
+            updateDateInput.min = today.toISOString().split('T')[0];
+            updateDateInput.max = thirtyDaysLater.toISOString().split('T')[0];
+            
+            // Toggle between booking ID and phone search
+            document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'booking_id') {
+                        document.getElementById('bookingIdField').style.display = 'block';
+                        document.getElementById('phoneField').style.display = 'none';
+                    } else {
+                        document.getElementById('bookingIdField').style.display = 'none';
+                        document.getElementById('phoneField').style.display = 'block';
+                    }
+                });
+            });
+            
+            // Load outlets for the update form
+            fetch('/api/knowledge/outlets')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data) {
+                        const outletSelect = document.getElementById('updateOutletSelect');
+                        data.data.forEach(outlet => {
+                            const option = document.createElement('option');
+                            option.value = outlet.id;
+                            option.textContent = `${outlet.name} (${outlet.city})`;
+                            outletSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading outlets:', error);
+                    // Fallback outlets
+                    const outletSelect = document.getElementById('updateOutletSelect');
+                    const delhiOption = document.createElement('option');
+                    delhiOption.value = 'BBQD001';
+                    delhiOption.textContent = 'Barbeque Nation - Connaught Place (Delhi)';
+                    outletSelect.appendChild(delhiOption);
+                    
+                    const bangaloreOption = document.createElement('option');
+                    bangaloreOption.value = 'BBQB001';
+                    bangaloreOption.textContent = 'Barbeque Nation - Koramangala (Bangalore)';
+                    outletSelect.appendChild(bangaloreOption);
+                });
+            
+            // Search for a booking
+            document.getElementById('searchButton').addEventListener('click', function() {
+                // Hide previous messages
+                document.getElementById('actionSuccess').style.display = 'none';
+                document.getElementById('actionError').style.display = 'none';
+                document.getElementById('bookingDetails').style.display = 'none';
+                document.getElementById('updateForm').style.display = 'none';
+                
+                // Get search parameters
+                const searchType = document.querySelector('input[name="searchType"]:checked').value;
+                let searchParams = {};
+                
+                if (searchType === 'booking_id') {
+                    const bookingId = document.getElementById('bookingId').value.trim();
+                    if (!bookingId) {
+                        document.getElementById('errorMessage').textContent = 'Please enter a booking ID';
+                        document.getElementById('actionError').style.display = 'block';
+                        return;
+                    }
+                    searchParams.booking_id = bookingId;
+                } else {
+                    const phone = document.getElementById('phoneNumber').value.trim();
+                    if (!phone) {
+                        document.getElementById('errorMessage').textContent = 'Please enter a phone number';
+                        document.getElementById('actionError').style.display = 'block';
+                        return;
+                    }
+                    searchParams.phone = phone;
+                }
+                
+                // Build the URL with query parameters
+                const url = new URL('/api/booking/find', window.location.origin);
+                Object.keys(searchParams).forEach(key => url.searchParams.append(key, searchParams[key]));
+                
+                // Find the booking
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Show booking details
+                            const booking = data.data;
+                            
+                            // Format the booking info HTML
+                            document.getElementById('bookingInfo').innerHTML = `
+                                <p><strong>Booking ID:</strong> ${booking.booking_id}</p>
+                                <p><strong>Outlet:</strong> ${booking.outlet_name}</p>
+                                <p><strong>Date:</strong> ${booking.booking_date}</p>
+                                <p><strong>Time:</strong> ${booking.booking_time}</p>
+                                <p><strong>Guests:</strong> ${booking.guests}</p>
+                                <p><strong>Name:</strong> ${booking.customer_name}</p>
+                                <p><strong>Phone:</strong> ${booking.phone}</p>
+                                <p><strong>Status:</strong> <span class="badge bg-${booking.status === 'confirmed' ? 'success' : 'secondary'}">${booking.status}</span></p>
+                            `;
+                            
+                            // Store booking ID for update/cancel operations
+                            document.getElementById('updateBookingId').value = booking.booking_id;
+                            
+                            // Pre-fill update form
+                            if (booking.outlet_id) {
+                                document.getElementById('updateOutletSelect').value = booking.outlet_id;
+                            }
+                            
+                            document.getElementById('updateDate').value = booking.booking_date;
+                            
+                            // Convert HH:MM:SS to HH:MM
+                            const timeStr = booking.booking_time.substring(0, 5);
+                            document.getElementById('updateTime').value = timeStr;
+                            
+                            document.getElementById('updateGuestCount').value = booking.guests;
+                            
+                            // Show booking details
+                            document.getElementById('bookingDetails').style.display = 'block';
+                            
+                            // Disable buttons if the booking is already cancelled
+                            if (booking.status === 'cancelled') {
+                                document.getElementById('modifyButton').disabled = true;
+                                document.getElementById('cancelButton').disabled = true;
+                            } else {
+                                document.getElementById('modifyButton').disabled = false;
+                                document.getElementById('cancelButton').disabled = false;
+                            }
+                        } else {
+                            // Show error
+                            document.getElementById('errorMessage').textContent = data.message || 'Booking not found';
+                            document.getElementById('actionError').style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error finding booking:', error);
+                        document.getElementById('errorMessage').textContent = 'There was a problem connecting to the booking service. Please try again later.';
+                        document.getElementById('actionError').style.display = 'block';
+                    });
+            });
+            
+            // Show update form when modify button is clicked
+            document.getElementById('modifyButton').addEventListener('click', function() {
+                document.getElementById('searchForm').style.display = 'none';
+                document.getElementById('bookingDetails').style.display = 'none';
+                document.getElementById('updateForm').style.display = 'block';
+            });
+            
+            // Hide update form when cancel button is clicked
+            document.getElementById('cancelUpdateButton').addEventListener('click', function() {
+                document.getElementById('searchForm').style.display = 'block';
+                document.getElementById('bookingDetails').style.display = 'block';
+                document.getElementById('updateForm').style.display = 'none';
+            });
+            
+            // Handle update form submission
+            document.getElementById('updateForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Hide previous messages
+                document.getElementById('actionSuccess').style.display = 'none';
+                document.getElementById('actionError').style.display = 'none';
+                
+                // Get update data
+                const updateData = {
+                    booking_id: document.getElementById('updateBookingId').value
+                };
+                
+                // Only include fields that have values
+                const outletId = document.getElementById('updateOutletSelect').value;
+                if (outletId) {
+                    updateData.outlet_id = outletId;
+                }
+                
+                const date = document.getElementById('updateDate').value;
+                if (date) {
+                    updateData.date = date;
+                }
+                
+                const time = document.getElementById('updateTime').value;
+                if (time) {
+                    updateData.time = time;
+                }
+                
+                const guests = document.getElementById('updateGuestCount').value;
+                if (guests) {
+                    updateData.guests = guests;
+                }
+                
+                // Submit update
+                fetch('/api/booking/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Show success message
+                        document.getElementById('successHeading').textContent = 'Booking Updated!';
+                        document.getElementById('successMessage').textContent = 'Your booking has been updated successfully.';
+                        document.getElementById('actionSuccess').style.display = 'block';
+                        
+                        // Reset forms and go back to search
+                        document.getElementById('searchForm').style.display = 'block';
+                        document.getElementById('bookingDetails').style.display = 'none';
+                        document.getElementById('updateForm').style.display = 'none';
+                    } else {
+                        // Show error
+                        document.getElementById('errorMessage').textContent = data.message || 'There was an error updating your booking.';
+                        document.getElementById('actionError').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating booking:', error);
+                    document.getElementById('errorMessage').textContent = 'There was a problem connecting to the booking service. Please try again later.';
+                    document.getElementById('actionError').style.display = 'block';
+                });
+            });
+            
+            // Handle booking cancellation
+            document.getElementById('cancelButton').addEventListener('click', function() {
+                if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+                    return;
+                }
+                
+                // Hide previous messages
+                document.getElementById('actionSuccess').style.display = 'none';
+                document.getElementById('actionError').style.display = 'none';
+                
+                // Get booking ID
+                const bookingId = document.getElementById('updateBookingId').value;
+                
+                // Submit cancellation
+                fetch('/api/booking/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ booking_id: bookingId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Show success message
+                        document.getElementById('successHeading').textContent = 'Booking Cancelled!';
+                        document.getElementById('successMessage').textContent = 'Your booking has been cancelled successfully.';
+                        document.getElementById('actionSuccess').style.display = 'block';
+                        
+                        // Reset forms and go back to search
+                        document.getElementById('searchForm').style.display = 'block';
+                        document.getElementById('bookingDetails').style.display = 'none';
+                    } else {
+                        // Show error
+                        document.getElementById('errorMessage').textContent = data.message || 'There was an error cancelling your booking.';
+                        document.getElementById('actionError').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cancelling booking:', error);
+                    document.getElementById('errorMessage').textContent = 'There was a problem connecting to the booking service. Please try again later.';
+                    document.getElementById('actionError').style.display = 'block';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -281,6 +281,21 @@ def manage_bookings():
             "error": str(e)
         }), 500
 
+@knowledge_base_bp.route('/outlets', methods=['GET'])
+def get_outlets():
+    """Get all outlets information"""
+    try:
+        return jsonify({
+            "status": "success",
+            "data": bbq_outlets_info
+        })
+    except Exception as e:
+        logger.error(f"Error getting outlets: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": "Failed to retrieve outlets information"
+        }), 500
+
 @knowledge_base_bp.route('/query', methods=['POST'])
 def query_knowledge_base():
     """General endpoint to query the knowledge base"""

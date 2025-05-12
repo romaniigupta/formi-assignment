@@ -37,11 +37,13 @@ CORS(app)
 from api.knowledge_base import knowledge_base_bp
 from api.post_call_analysis import post_call_bp
 from api.conversation_service import conversation_bp
+from api.booking_service import booking_bp
 
 # Register blueprints
 app.register_blueprint(knowledge_base_bp, url_prefix='/api/knowledge')
 app.register_blueprint(post_call_bp, url_prefix='/api/logs')
 app.register_blueprint(conversation_bp, url_prefix='/api/conversation')
+app.register_blueprint(booking_bp)
 
 # Initialize routes
 init_routes(app)

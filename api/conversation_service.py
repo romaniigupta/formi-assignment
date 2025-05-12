@@ -262,10 +262,16 @@ def handle_function_call():
                             "type": "booking_cancellation",
                             "message": "I can help you cancel your reservation. To proceed, I'll need your booking ID or the phone number used for the reservation. Could you please provide that information?"
                         }
-                    else:
+                    elif any(word in query.lower() for word in ['change', 'modify', 'update', 'reschedule']):
                         result = {
                             "type": "booking_modification",
                             "message": "I can help you modify your existing reservation. To proceed, I'll need your booking ID or the phone number used for the reservation. After that, please let me know what changes you'd like to make (date, time, number of guests, or outlet)."
+                        }
+                    else:
+                        # If we detect "booking" but not other keywords, it might be a new booking
+                        result = {
+                            "type": "booking", 
+                            "message": "I'd be happy to help you make a reservation. To book a table at Barbeque Nation, I'll need:\n\n1. Which outlet would you prefer (Delhi or Bangalore)?\n2. What date would you like to reserve?\n3. What time would be convenient?\n4. How many guests will be joining?\n5. May I have your name and phone number for the reservation?\n\nPlease provide these details and I'll arrange the booking for you."
                         }
                 
                 elif query_type == 'outlets' or any(word in query.lower() for word in ['outlet', 'location', 'address', 'where']):
