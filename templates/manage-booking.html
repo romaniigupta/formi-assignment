@@ -344,6 +344,56 @@
                 document.getElementById('updateForm').style.display = 'none';
             });
             
+            // Handle test booking creation
+            document.getElementById('createTestBooking').addEventListener('click', function() {
+                // Create test booking through API
+                fetch('/api/booking/test')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const booking = data.data;
+                            // Populate the test booking details
+                            document.getElementById('testBookingDetails').innerHTML = `
+                                <p><strong>Booking ID:</strong> ${booking.booking_id}</p>
+                                <p><strong>Phone:</strong> ${booking.phone}</p>
+                                <p><strong>Outlet:</strong> ${booking.outlet_name || booking.outlet_id}</p>
+                                <p><strong>Date:</strong> ${booking.date}</p>
+                                <p><strong>Time:</strong> ${booking.time}</p>
+                                <p><strong>Guests:</strong> ${booking.guests}</p>
+                                <p class="text-info">Use either the Booking ID or Phone number to look up this reservation.</p>
+                            `;
+                            
+                            // Show the modal with test booking info
+                            const modal = new bootstrap.Modal(document.getElementById('testBookingModal'));
+                            modal.show();
+                            
+                            // Set up the "Use This Booking" button
+                            document.getElementById('useTestBooking').onclick = function() {
+                                // Close the modal
+                                modal.hide();
+                                
+                                // Fill the search form with the booking ID
+                                document.getElementById('bookingIdRadio').checked = true;
+                                document.getElementById('bookingIdField').style.display = 'block';
+                                document.getElementById('phoneField').style.display = 'none';
+                                document.getElementById('bookingId').value = booking.booking_id;
+                                
+                                // Automatically submit the search
+                                document.getElementById('searchButton').click();
+                            };
+                        } else {
+                            // Show error message
+                            document.getElementById('errorMessage').textContent = data.message || 'Failed to create test booking';
+                            document.getElementById('actionError').style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating test booking:', error);
+                        document.getElementById('errorMessage').textContent = 'There was a problem creating the test booking.';
+                        document.getElementById('actionError').style.display = 'block';
+                    });
+            });
+            
             // Handle update form submission
             document.getElementById('updateForm').addEventListener('submit', function(e) {
                 e.preventDefault();

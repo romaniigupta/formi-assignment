@@ -26,22 +26,30 @@ post_call_bp = Blueprint('post_call', __name__)
 def get_sheets_client():
     """Initialize and return Google Sheets client"""
     try:
-        # Try to use service account credentials from environment variable
-        creds_json = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+        # First check for credentials file path
+        creds_file = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+        if creds_file and os.path.exists(creds_file):
+            # OAuth2 credentials from file
+            scope = ['https://spreadsheets.google.com/feeds',
+                    'https://www.googleapis.com/auth/drive']
+            credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_file, scope)
+            return gspread.authorize(credentials)
         
+        # Next try to use service account credentials from environment variable
+        creds_json = os.environ.get('GOOGLE_CREDENTIALS_JSON')
         if creds_json:
             # Parse JSON from environment variable
             import json
             creds_dict = json.loads(creds_json)
             
-            # OAuth2 credentials
+            # OAuth2 credentials from dict
             scope = ['https://spreadsheets.google.com/feeds',
                     'https://www.googleapis.com/auth/drive']
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
             
             return gspread.authorize(credentials)
         else:
-            logger.error("No Google credentials found in environment variables")
+            logger.warning("Google credentials not found. Set GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_CREDENTIALS_JSON environment variables to enable Google Sheets logging.")
             return None
     except Exception as e:
         logger.error(f"Error initializing Google Sheets client: {str(e)}")
@@ -97,8 +105,34 @@ def log_conversation():
             booking_date,
             booking_time,
             guests,
-            call_summary
+            call_summary,
+            conversation[:1000]  # Truncated conversation text to avoid exceeding sheet limits
         ]
+        
+        # Also save to database
+        try:
+            from models import db, ConversationLog
+            
+            # Create new conversation log entry
+            new_log = ConversationLog(
+                modality=modality,
+                phone_number=phone_number,
+                call_outcome=call_outcome,
+                outlet_name=outlet_name,
+                booking_date=booking_date,
+                booking_time=booking_time,
+                guests=str(guests),
+                call_summary=call_summary,
+                conversation_text=conversation
+            )
+            
+            # Save to database
+            db.session.add(new_log)
+            db.session.commit()
+            logger.info(f"Conversation log saved to database with ID: {new_log.id}")
+        except Exception as db_error:
+            logger.error(f"Error saving to database: {str(db_error)}")
+            # Continue with Google Sheets logging attempt even if DB fails
         
         # Try to log data to Google Sheets
         sheets_client = get_sheets_client()
@@ -178,7 +212,8 @@ def log_locally(row_data):
             "booking_date": row_data[5],
             "booking_time": row_data[6],
             "guests": row_data[7],
-            "call_summary": row_data[8]
+            "call_summary": row_data[8],
+            "conversation_text": row_data[9] if len(row_data) > 9 else "N/A"
         }
         
         # Write to file
