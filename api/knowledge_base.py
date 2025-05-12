@@ -285,6 +285,19 @@ def manage_bookings():
 def get_outlets():
     """Get all outlets information"""
     try:
+        # Import here to avoid circular imports
+        from data.bbq_knowledge_base import bbq_outlets_info
+        
+        # Filter outlets by city if specified
+        city = request.args.get('city')
+        if city:
+            city_outlets = [outlet for outlet in bbq_outlets_info if outlet['city'].lower() == city.lower()]
+            return jsonify({
+                "status": "success",
+                "data": city_outlets
+            })
+        
+        # Return all outlets if no city filter
         return jsonify({
             "status": "success",
             "data": bbq_outlets_info

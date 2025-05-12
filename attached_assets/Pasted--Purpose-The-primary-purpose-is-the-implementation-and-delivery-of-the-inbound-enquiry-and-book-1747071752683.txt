@@ -1,0 +1,70 @@
+
+
+Purpose 
+The primary purpose is the implementation and delivery of the inbound enquiry and booking chatbot agent for Barbeque nation, which would be answering FAQ Questions, Noting down new bookings, and updating/cancellation of bookings for the properties catered by Barbeque Nation in Delhi, Bangalore.
+System Breakdown
+
+Component
+Definition
+Objectives
+Configuration Required
+State Prompt
+A state and a state prompt represents the context or instruction of the conversational AI system at a given point during an interaction.
+A conversational flow would have multiple states, and at one turn in a conversation only one state can be active.
+Maintain Instructional Integrity: Accurately capture and store the current context to ensure the system understands the conversation's status and the action steps to take for resolution.
+Ensure only one state is active at any given turn to prevent ambiguity in the conversation flow
+
+
+Each state prompt is a template which requires certain variable filling of the entities, conditions and tools which would be used by the state to drive completion. The state prompt templates are shared in the resources.
+State Transition Prompt
+A state transition prompt is a predefined instruction or template used by the conversational AI to determine how to move from one state to another based on the current state and user input. It is a rule or logic component, often implemented as a conditional statement that evaluates the user’s input and contextual data to select the appropriate next state.
+Once the intended task of the state is complete, moving to the next state is the task of the state transition prompt.
+Correctly evaluate user input and contextual data to identify the appropriate next state, ensuring smooth progression of the conversation
+Reliably determine when the current state’s intended task is fulfilled to trigger the transition to the next state.
+NA
+Knowledge Base
+The knowledge base is a structured of information that the conversational AI system draws upon to generate accurate and contextually relevant responses. It contains domain-specific data, facts, rules, or documents (e.g., FAQs, product manuals, or ontologies) and may be implemented as a database, vector store, or graph structure. The system queries the knowledge base using techniques like information retrieval or semantic search to augment its responses or resolve user queries.
+Deliver accurate and contextually appropriate data to support the system’s response generation or query resolution.
+NA
+Post-Call Configuration (BONUS)
+Post-call analysis refers to the process of evaluating and extracting insights from a completed conversation (or "call") between the user and the conversational AI system. This involves analyzing metrics such as user satisfaction, intent fulfillment, response accuracy, conversation flow, and error rates. Techniques may include log parsing, sentiment analysis, topic modeling, or performance benchmarking. The analysis is used to identify areas for improvement in the system’s dialog management, knowledge base, or state transition logic, often feeding into model retraining or system optimization.
+Giving clarity to the business on the agent’s performance and if any resolution pendings are supposed to be completed from their team’s end.
+NA
+Chatbot (BONUS)
+Reverse engineer the API endpoints of the platform you are building the agent on, using the “Network” tab to create a chatbot and share the Chatbot Link.
+
+
+
+
+
+Functional Requirement
+Fork the templates and the methods shared in https://github.com/AryamannNingombam/agentops-template-repo
+to complete the API endpoints for the Knowledge Base, Chatbot and Post-Call Configuration.
+To build the steps of the conversation flow, utilise the:
+Conversational Flow Diagram.
+State Template Diagram
+to drive the conversational flow.
+To drive the conversation flow in the right direction, write down the state transition prompts which would lead the conversation in the right direction.
+For each property, convert the raw knowledge base shared by the business into a structured knowledge base tool which would be used by the agent to answer enquiries based on the property they are enquiring regarding.
+Host the API endpoints for the knowledge base and the phone number for conversational flow.
+BONUS Functional Requirements:
+Post-Call Analysis which would share information regarding the interaction status.
+Chatbot creation where you will reverse engineer the API endpoints of beta.retellai.com to create a chatbot with your own frontend UI and host it for demonstration.
+Submission Method and Guidelines
+Create a Fork of: https://github.com/AryamannNingombam/agentops-template-repo
+Add the link for the
+Knowledge Base API Endpoints
+Post-Call Analysis Excel Sheet
+Chatbot Link
+Agent Linked Phone Number
+in your project ReadME description.
+Submit this form: https://forms.gle/7qSTquHbBaKzy9MJ8
+A short technical documentation which tells the complete story of your system. Include:
+Detailed architecture diagrams showing how all components interact
+API documentation explaining all endpoints and their purposes.
+
+Resources
+State Prompts & Knowledge Base : AgentOps - Assignment Resources
+Platform for State Machine: https://beta.retellai.com/ 
+
+
