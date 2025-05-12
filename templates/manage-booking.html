@@ -326,7 +326,7 @@
                     })
                     .catch(error => {
                         console.error('Error finding booking:', error);
-                        document.getElementById('errorMessage').textContent = 'There was a problem connecting to the booking service. Please try again later.';
+                        document.getElementById('errorMessage').textContent = 'There was a problem connecting to the booking service. Error: ' + (error.message || 'Unknown error');
                         document.getElementById('actionError').style.display = 'block';
                     });
             });
@@ -390,7 +390,7 @@
                     })
                     .catch(error => {
                         console.error('Error creating test booking:', error);
-                        document.getElementById('errorMessage').textContent = 'There was a problem creating the test booking.';
+                        document.getElementById('errorMessage').textContent = 'There was a problem creating the test booking. Error: ' + (error.message || 'Unknown error');
                         document.getElementById('actionError').style.display = 'block';
                     });
             });
