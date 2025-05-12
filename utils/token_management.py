@@ -95,11 +95,11 @@ class TokenManager:
         Optimize a data structure to fit within token limits by prioritizing important fields.
         
         Args:
-            data (dict): Data structure to optimize
+            data (dict or list): Data structure to optimize
             important_fields (list, optional): List of fields to prioritize
             
         Returns:
-            dict: Optimized data structure
+            dict or list: Optimized data structure
         """
         if important_fields is None:
             important_fields = []
@@ -112,7 +112,36 @@ class TokenManager:
         if curr_tokens <= self.max_tokens:
             return data
         
-        # Create a copy to modify
+        # Handle lists of dictionaries (like outlets)
+        if isinstance(data, list):
+            # Create a copy of the list
+            optimized_list = []
+            
+            # Process each item in the list
+            for item in data:
+                if isinstance(item, dict):
+                    # Optimize the dictionary
+                    optimized_item = {}
+                    
+                    # Include only important fields
+                    for field in important_fields:
+                        if field in item:
+                            optimized_item[field] = item[field]
+                    
+                    optimized_list.append(optimized_item)
+                else:
+                    # For non-dict items, add them as is
+                    optimized_list.append(item)
+            
+            # Check if optimized list is under the token limit
+            if self.count_tokens(str(optimized_list)) <= self.max_tokens:
+                return optimized_list
+            
+            # If still too large, return a smaller subset
+            max_items = min(len(optimized_list), 10)  # Return at most 10 items
+            return optimized_list[:max_items]
+        
+        # Create a copy to modify for dictionaries
         optimized_data = data.copy() if isinstance(data, dict) else data
         
         # If it's a dictionary, try to optimize it
@@ -135,16 +164,10 @@ class TokenManager:
                     if self.count_tokens(str(optimized_data)) <= self.max_tokens:
                         break
         
-        # If we're still over the limit, convert to string and truncate
-        optimized_str = str(optimized_data)
-        if self.count_tokens(optimized_str) > self.max_tokens:
-            optimized_str = self.truncate_to_max_tokens(optimized_str)
-            # Try to convert back to original format if possible
-            try:
-                import ast
-                optimized_data = ast.literal_eval(optimized_str)
-            except:
-                # If conversion fails, return the truncated string
-                return {"truncated_data": optimized_str}
+        # If we're still over the limit, return only the important data
+        if self.count_tokens(str(optimized_data)) > self.max_tokens:
+            if isinstance(data, dict):
+                return {k: data.get(k) for k in important_fields if k in data}
+            return optimized_data
                 
         return optimized_data

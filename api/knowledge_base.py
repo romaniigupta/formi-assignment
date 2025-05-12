@@ -45,13 +45,20 @@ def get_outlets_info():
         # Important fields to prioritize in responses
         important_fields = ["id", "name", "address", "city", "phone", "opening_hours"]
         
-        # Optimize the response to stay under token limit
-        optimized_outlets = token_manager.optimize_response(outlets, important_fields)
+        # Ensure we're returning a proper list, not a stringified representation
+        outlet_list = []
+        for outlet in outlets:
+            # Include only the important fields
+            outlet_data = {}
+            for field in important_fields:
+                if field in outlet:
+                    outlet_data[field] = outlet[field]
+            outlet_list.append(outlet_data)
         
         return jsonify({
             "status": "success",
-            "message": f"Found {len(optimized_outlets)} outlets",
-            "data": optimized_outlets
+            "message": f"Found {len(outlet_list)} outlets",
+            "data": outlet_list
         })
         
     except Exception as e:
