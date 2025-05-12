@@ -1,0 +1,114 @@
+
+Overview 
+Create a conversation logging system integrated with Google Sheets post each call/chatbot interaction done
+Core Requirements
+Create a system to track and summarize customer conversations
+Develop integration with Google Sheets API
+Implement automated logging of fields defined below post interaction done on Chatbot or the Voice Call.
+
+Objectives
+Conversation Documentation
+Once the conversation is over, capture and process conversation data
+Design efficient Google Sheets integration for data logging
+Ensure accurate field mapping between conversation data and sheet structure
+Implement validation for successful data entry.
+Create error recovery mechanisms for failed logging attempts and triggers to yourself for the same.
+Integration Requirements
+Design data flow for agent-API communication once the call is over
+Design data flow for agent-API communication once the window is closed ( assuming chatbot interaction )
+Implement authentication and authorization.
+Data Required
+
+
+
+
+
+
+Name
+Description
+Examples
+Modality
+Call/Chatbot
+
+
+Call Time
+The Call time in IST
+26th January 5:15:40 PM
+Phone Number
+The 10 digit phone number of the customer that called
+
+
+Call Outcome
+The reason the customer called, one of the options in the examples provided.
+Enquiry: Asking a question
+Availability: Looking to book a room and wants to know about availability and pricing
+Post-Booking: called regarding post-booking amendments or special requests.
+Misc: Any other reason for call other than the ones above.
+Booking Date
+The booking date for which they are looking for a booking.
+standard YYYY-MM-DD format, if not provided send NA.
+Booking Time
+The booking time for which they are looking for a booking.
+standard HH:MM format, if not provided send NA.
+Customer Name
+The customer’s name.
+‘Aryamann’, ‘Anirudh’.
+Number of Guests
+The number of guests for the booking.
+
+
+Call Summary
+Short summary of the call with the next steps..
+
+
+
+
+
+Sample Data
+
+Modality
+Call Time
+Phone Number
+Call Outcome
+Room Name
+Booking Date
+Booking Time
+Number of Guests
+Call Summary
+
+
+Chatbot
+2025-01-03 12:44:55
+9833620578
+MISC.
+NA
+NA
+NA
+NA
+The user initiated a call to Kemps Corner Hotel but experienced some communication issues, leading to a fallback response from the agent. The conversation is ongoing, and the user seems to be trying to convey information about a previous interaction.
+
+
+Chatbot
+2025-01-03 12:45:16
+9833620578
+MISC.
+NA
+NA
+NA
+NA
+The user attempted to communicate a request but only provided the number '6' without further context. The call did not progress to a clear outcome or resolution.
+
+
+Call
+2025-01-03 12:50:07
+9833620578
+ROOM_AVAILABILITY
+Executive Room
+03-01-2025
+15:30
+2
+The user called to inquire about room availability at Kemps Corner Hotel for check-in today and check-out tomorrow. After confirming the details and discussing room options, the user expressed interest in booking an Executive Room but faced communication issues, leading to a request for a booking voucher and a follow-up with a human agent.
+
+
+
+

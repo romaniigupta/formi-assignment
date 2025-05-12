@@ -1,0 +1,51 @@
+Knowledge Base Overview
+NOTE: Please note that the tools/platforms that you would be using for this assignment might/might not be tools used by Formi, but tools that would assist in your work.
+The platform that you would be using for the purpose of this project would be retellai.com for simplicity in building the bare required components.
+You are using Retell AI to build Voice AI agents for your projects.
+The current Voice AI application's knowledge base functionality faces accuracy issues due to implementation constraints.
+A solution using function calling has been proposed, but it has an 800-token limitation per response, if the response from the function calling has over 800 tokens, its truncated into 800 tokens.
+You have to implement the below objectives:
+Develop a series of APIs to serve as an information delivery system for the AI agent.
+
+Core Requirements:
+Design and implement APIs that break down information into manageable chunks (under 800 tokens)
+Ensure APIs can provide contextually relevant information based on customer queries
+Implement a routing system to determine which information chunks to serve
+Maintain information accuracy and completeness despite the token limitation
+
+Technical Constraints:
+Maximum response size: 800 tokens per API response.
+
+Sample Knowledge Base Conversion as Example: https://bustling-fisher-13f.notion.site/Cleaned-Document-Example-Overview-172a9afc9fbc8072afaae86880795fa9
+Objectives
+1. Information Accuracy and Delivery
+Ensure precise and accurate information delivery to the AI agent based on customer queries.
+Implement robust validation mechanisms to verify information accuracy
+Design a system to break down and serve information within the 800-token limit while maintaining completeness.
+2. Hallucination Prevention
+Develop strict validation mechanisms to identify when requested information is not available
+Implement clear "information not found" protocols in a conversational manner.
+Create explicit boundaries for the AI agent's knowledge domain
+Design feedback mechanisms to report and log cases where information is unavailable
+3. Error Handling and Edge Cases
+Implement comprehensive error handling for all API endpoints
+Design robust input validation for various query types
+Create fallback mechanisms for edge cases
+Develop monitoring systems to detect and log unusual query patterns
+Ensure graceful degradation in case of system limitation
+Requirements
+Data Management Requirements
+Process and clean the provided information dump
+Categorize and structure information for efficient retrieval
+Create a standardized format for information storage
+Implement data validation rules for information accuracy
+Design data versioning system for updates
+
+API Development Requirements
+Create RESTful APIs for information retrieval with endpoint for query classification
+Implement token size management system
+Develop caching mechanism for frequently accessed information
+
+
+Resources
+Knowledge Base Directory: AgentOps - Assignment Resources
