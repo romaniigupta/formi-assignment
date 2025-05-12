@@ -1,13 +1,5 @@
 // Chat functionality for Barbeque Nation AI Assistant
 
-// DOM elements
-const chatMessages = document.getElementById('chat-messages');
-const chatForm = document.getElementById('chat-form');
-const userInput = document.getElementById('user-input');
-const userPhone = document.getElementById('user-phone');
-const clearChatBtn = document.getElementById('clear-chat');
-const sampleQuestions = document.querySelectorAll('.sample-question');
-
 // Chat state
 let conversationState = 'greeting';
 let conversationContext = {};
@@ -17,11 +9,38 @@ let currentPhone = '';
 // Store API base URL
 const API_BASE = window.location.origin;
 
+// DOM elements - will be initialized when DOM is ready
+let chatMessages;
+let chatForm;
+let userInput;
+let userPhone;
+let clearChatBtn;
+let sampleQuestions;
+
 // Initialize chat when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  initializeChat();
-  setupEventListeners();
-  loadChatHistory();
+  console.log("DOM content loaded - initializing chat elements");
+  
+  // Initialize DOM elements after document is loaded
+  chatMessages = document.getElementById('chat-messages');
+  chatForm = document.getElementById('chat-form');
+  userInput = document.getElementById('user-input');
+  userPhone = document.getElementById('user-phone');
+  clearChatBtn = document.getElementById('clear-chat');
+  sampleQuestions = document.querySelectorAll('.sample-question');
+  
+  // Check if elements were found
+  if (!chatMessages) {
+    console.error("Chat messages container not found!");
+  }
+  
+  if (!chatForm) {
+    console.error("Chat form not found!");
+  } else {
+    initializeChat();
+    setupEventListeners();
+    loadChatHistory();
+  }
 });
 
 // Initialize chat with greeting message
