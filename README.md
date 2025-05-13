@@ -63,15 +63,11 @@ The system uses a state machine architecture to manage conversation flow, with d
   - Base URL: `https://bbq-conversation-ai.example.com/api/knowledge`
   - Documentation: See API Documentation section
 
-- **Post-Call Analysis Sheet**:
-  - Google Sheets Link: [BBQ Nation Conversation Logs](https://docs.google.com/spreadsheets/d/your-sheet-id)
+- **Post-Call Analysis **:
 
 - **Chatbot Link**:
   - Web Interface: `https://bbq-conversation-ai.example.com/chat`
   - Direct Form: `https://bbq-conversation-ai.example.com/booking`
-
-- **Agent Phone Number**:
-  - RetellAI Demo Number: +1-XXX-XXX-XXXX
 
 ## Technical Implementation Details
 
@@ -119,13 +115,6 @@ Conversation data is logged to a Google Sheet with the following columns:
 - Google Cloud credentials (for Sheets API)
 - RetellAI account and API keys
 
-### Environment Variables
-
-- `DATABASE_URL`: PostgreSQL connection string
-- `GOOGLE_CREDENTIALS_JSON`: Google service account credentials in JSON format
-- `GOOGLE_SHEETS_ID`: ID of the Google Sheet for logging
-- `RETELL_API_KEY`: API key for RetellAI platform
-- `SESSION_SECRET`: Secret key for session management
 
 ### Installation
 
@@ -143,7 +132,3 @@ This system integrates with RetellAI for state machine handling. The integration
 3. Generate appropriate responses based on the current state
 
 The RetellAI integration code is in `api/conversation_service.py`.
-
-## License
-
-This project is created for assessment purposes only.
